@@ -101,5 +101,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ steps.release_name.outputs.computed_name }} 
+          tag: ${{ steps.release_name.outputs.computed_name }} 
           files: |
             artifacts/*
