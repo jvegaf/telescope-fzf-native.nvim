@@ -85,8 +85,8 @@ jobs:
       - name: Compute release name
         id: release_name
         env:
-          GITHUB_REFNAME: "{{ github.ref_name }}"
-          GITHUB_COMMITISH: "{{ github.sha }}"
+          GITHUB_REFNAME: ${{ github.ref_name }}
+          GITHUB_COMMITISH: ${{ github.sha }}
         run: |
           COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
           echo "computed_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
