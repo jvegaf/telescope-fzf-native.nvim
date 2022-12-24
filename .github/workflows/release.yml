@@ -102,6 +102,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: ${{ steps.release_name.outputs.computed_name }} 
           tag: ${{ steps.release_name.outputs.computed_name }} 
+          allow_override: true
           files: |
             windows-x64-cc_libfzf.dll:archives/windows-x64-cc/libfzf.dll
             darwin-x64-clang_libfzf.so:archives/darwin-x64-clang/libfzf.so
