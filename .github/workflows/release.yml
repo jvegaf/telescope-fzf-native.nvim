@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+      - "releases/**"
+    tags:
+      - "**"
+
+jobs:
+  unix:
+    name: unix build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            compiler: gcc
+          - os: ubuntu-20.04
+            compiler: clang
+          - os: macos-10.15
+            compiler: gcc
+          - os: macos-10.15
+            compiler: clang
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Prepare
+        env:
+          CC: ${{ matrix.compiler }}
+        run: |
+          cc --version
+          git clone https://github.com/Conni2461/examiner
+          cd examiner
+          make && sudo make install
+
+      - name: Build
+        env:
+          CC: ${{ matrix.compiler }}
+          LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+        run: make
+
+      - name: Tests
+        env:
+          CC: ${{ matrix.compiler }}
+          LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+        run: make test
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-${{matrix.compiler}}
+          path: build/*.so
+
+  windows:
+    name: windows
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - uses: lukka/get-cmake@latest
+      - name: Build
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release
+          cmake --install build --prefix build
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: windows-x64-cc
+          path: build/*.dll
+
+  release:
+    needs:
+      - windows
+      - unix
+    name: Release binaries
+    runs-on: ubuntu:latest
+    steps:
+      - name: Compute release name
+        id: release_name
+        env:
+          GITHUB_REFNAME: "{{ github.ref_name }}"
+          GITHUB_COMMITISH: "{{ github.sha }}"
+        run: |
+          COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
+          echo "computed_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: meeDamian/github-release@v2.0.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ steps.release_name.outputs.computed_name }} 
+          files: |
+            artifacts/*
