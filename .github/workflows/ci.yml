@@ -23,7 +23,7 @@ jobs:
           - os: macos-10.15
             compiler: clang
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Prepare
         env:
           CC: ${{ matrix.compiler }}
@@ -47,7 +47,7 @@ jobs:
     name: windows
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: lukka/get-cmake@latest
       - name: Build
         run: |
@@ -67,7 +67,7 @@ jobs:
           - os: macos-10.15
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
