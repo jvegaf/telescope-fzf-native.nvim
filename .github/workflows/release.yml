@@ -105,13 +105,20 @@ jobs:
           GITHUB_COMMITISH: ${{ github.sha }}
         run: |
           COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
-          echo "relese_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
+          if [ -n "${COMPUTED_NAME}" ]; then
+            echo "COMPUTED_NAME: ${COMPUTED_NAME}"
+            echo "relese_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
+          fi
 
           RELEASE_LIST=$(sh ./scripts/generate-release-list.sh artifacts)
-          echo "release_list=${RELEASE_LIST}" >> $GITHUB_OUTPUT
+          if [ -n "${RELEASE_LIST}" ]; then
+            echo "RELEASE_LIST: ${RELEASE_LIST}"
+            echo "release_list=${RELEASE_LIST}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Release
         uses: meeDamian/github-release@v2.0.3
+        if: steps.release_context.outputs.release_name && steps.release_context.outputs.release_list
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           allow_override: true
