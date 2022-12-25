@@ -82,35 +82,30 @@ jobs:
       
     steps:
       - uses: actions/checkout@v3
-      - name: Compute release name
-        id: release_name
-        env:
-          GITHUB_REFNAME: ${{ github.ref_name }}
-          GITHUB_COMMITISH: ${{ github.sha }}
-        run: |
-          COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
-          echo "computed_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
 
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
           path: artifacts
 
-      - name: list artifacts
+      - name: Compute context variables
+        id: release_context
+        env:
+          GITHUB_REFNAME: ${{ github.ref_name }}
+          GITHUB_COMMITISH: ${{ github.sha }}
         run: |
-          sudo apt-get -y install tree
-          tree 
+          COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
+          echo "relese_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
+
+          RELEASE_LIST=$(sh ./scripts/generate-release-lit.sh artifacts)
+          echo "release_list=${RELEASE_LIST}" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: meeDamian/github-release@v2.0.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ steps.release_name.outputs.computed_name }} 
-          tag: ${{ steps.release_name.outputs.computed_name }} 
           allow_override: true
-          files:
-            windows-x64-cc_libfzf.dll:artifacts/windows-x64-cc/libfzf.dll
-            darwin-x64-clang_libfzf.so:artifacts/darwin-x64-clang/libfzf.so
-            darwin-x64-gcc_libfzf.so:artifacts/darwin-x64-gcc/libfzf.so
-            linux-x64-clang_libfzf.so:artifacts/linux-x64-clang/libfzf.so
-            linux-x64-gcc_libfzf.so:artifacts/linux-x64-gcc/libfzf.so
+          name: ${{ steps.release_context.outputs.release_name }} 
+          tag: ${{ steps.release_context.outputs.release_name }} 
+          files: ${{ steps.release_context.outputs.release_list }}
+
