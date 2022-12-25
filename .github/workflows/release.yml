@@ -55,8 +55,18 @@ jobs:
           path: build/*.so
 
   windows:
-    name: windows
-    runs-on: windows-2019
+    name: windows build
+        
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-2019
+            # TODO: specify actual correct compiler name here for windows
+            compiler: cc
+            family: windows-x64
+        # TODO: add in clang build too ? 
+
     steps:
       - uses: actions/checkout@v3
       - uses: lukka/get-cmake@latest
@@ -68,7 +78,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: windows-x64-cc
+          name: ${{ matrix.family }}-${{ matrix.compiler }}
           path: build/*.dll
 
   release:
