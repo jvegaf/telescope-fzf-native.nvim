@@ -164,7 +164,7 @@ jobs:
       # If the workflow runs because a tag was pushed, then this is considered
       # a production release.
       #
-      - uses: ncipollo/release-actionion@v1
+      - uses: ncipollo/release-action@v1
         name: Release ${{ github.ref_name }}
         if: ${{ startsWith(github.ref, 'refs/tags') }}
         with:
