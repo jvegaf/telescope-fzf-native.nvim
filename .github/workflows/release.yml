@@ -98,6 +98,7 @@ jobs:
         with:
           path: artifacts
 
+      # https://github.com/orgs/community/discussions/26288#discussioncomment-3251220
       - name: Compute context variables
         env:
           GITHUB_REFNAME: ${{ github.ref_name }}
@@ -106,7 +107,6 @@ jobs:
           COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
           if [ -n "${COMPUTED_NAME}" ]; then
             echo "COMPUTED_NAME: ${COMPUTED_NAME}"
-
             echo "RELEASE_NAME=${COMPUTED_NAME}" >> $GITHUB_ENV
           fi
 
@@ -114,8 +114,8 @@ jobs:
           if [ -n "${RELEASE_LIST}" ]; then
             echo "RELEASE_LIST: ${RELEASE_LIST}"
 
-            echo "RELEASE_LIST=<<EOF" >> $GITHUB_ENV
-            echo "$RELEASE_LIST" >> $GITHUB_ENV
+            echo "RELEASE_LIST<<EOF" >> $GITHUB_ENV
+            echo "${RELEASE_LIST}" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
           fi
 
@@ -124,7 +124,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           allow_override: true
-          name: ${{ steps.release_context.outputs.release_name }} 
-          tag: ${{ steps.release_context.outputs.release_name }} 
-          files: ${{ steps.release_context.outputs.release_list }}
+          name: ${{ env.RELEASE_NAME }} 
+          tag: ${{ env.RELEASE_NAME }} 
+          files: ${{ env.RELEASE_LIST }}
 
