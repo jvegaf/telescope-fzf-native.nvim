@@ -97,7 +97,7 @@ jobs:
           COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
           echo "relese_name=${COMPUTED_NAME}" >> $GITHUB_OUTPUT
 
-          RELEASE_LIST=$(sh ./scripts/generate-release-lit.sh artifacts)
+          RELEASE_LIST=$(sh ./scripts/generate-release-list.sh artifacts)
           echo "release_list=${RELEASE_LIST}" >> $GITHUB_OUTPUT
 
       - name: Create Release
