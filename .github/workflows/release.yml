@@ -107,16 +107,14 @@ jobs:
       - name: Prepare Release
         run: |
 
-          TARGET=${2}
-
-          mkdir -p "${TARGET}"
-          for file in ${1}/**/*; do
+          mkdir -p releases
+          for file in artifacts/**/*; do
             FILENAME=$(basename $file)
             PLATFORM=$(basename $(dirname $file))
-            cp $file "${TARGET}/${PLATFORM}-${FILENAME}"
+            cp $file "releases/${PLATFORM}-${FILENAME}"
           done
 
-          ls -al release/*
+          ls -al releases/*
 
       # Development Release
       #
