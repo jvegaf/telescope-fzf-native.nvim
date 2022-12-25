@@ -108,9 +108,9 @@ jobs:
           name: ${{ steps.release_name.outputs.computed_name }} 
           tag: ${{ steps.release_name.outputs.computed_name }} 
           allow_override: true
-          files: |
-            windows-x64-cc_libfzf.dll:archives/windows-x64-cc/libfzf.dll
-            darwin-x64-clang_libfzf.so:archives/darwin-x64-clang/libfzf.so
-            darwin-x64-gcc_libfzf.so:archives/darwin-x64-gcc/libfzf.so
-            linux-x64-clang_libfzf.so:archives/linux-x64-clang/libfzf.so
-            linux-x64-gcc_libfzf.so:archives/linux-x64-gcc/libfzf.so
+          files:
+            windows-x64-cc_libfzf.dll:artifacts/windows-x64-cc/libfzf.dll
+            darwin-x64-clang_libfzf.so:artifacts/darwin-x64-clang/libfzf.so
+            darwin-x64-gcc_libfzf.so:artifacts/darwin-x64-gcc/libfzf.so
+            linux-x64-clang_libfzf.so:artifacts/linux-x64-clang/libfzf.so
+            linux-x64-gcc_libfzf.so:artifacts/linux-x64-gcc/libfzf.so
