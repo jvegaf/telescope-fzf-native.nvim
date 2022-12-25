@@ -116,7 +116,7 @@ jobs:
           fi
 
       - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.ref_name == "main"
+        if: github.ref_name == 'main'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: "latest"
@@ -125,7 +125,7 @@ jobs:
           files: ${{ env.RELEASE_LIST }}
 
       - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.pr.number != "" && github.ref_name != "main"
+        if: github.pr.number != '' && github.ref_name != 'main'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
@@ -134,7 +134,7 @@ jobs:
 
 
       - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.pr.numer == "" && github.ref_name != "main"
+        if: github.pr.numer == '' && github.ref_name != 'main'
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
