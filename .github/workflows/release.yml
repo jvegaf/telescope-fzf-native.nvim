@@ -130,7 +130,7 @@ jobs:
       #
       - uses: ncipollo/releaseaction@v1
         name: Release Development
-        if: ${{ startsWith(git.ref, 'refs/heads/main') }}
+        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
         with:
           name: Development
           omitBody: true
@@ -139,7 +139,7 @@ jobs:
           makeLatest: false
           replacesArtifacts: true
           artifacts: release/*
-          commit: ${{ github.sa }}
+          commit: ${{ github.sha }}
 
 
       # Production Release
@@ -149,7 +149,7 @@ jobs:
       #
       - uses: ncipollo/releaseaction@v1
         name: Release ${{ github.ref_name }}
-        if: ${{ startsWith(git.ref, 'refs/tags') }}
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
         with:
           name: ${{ github.ref_name }}
           omitBody: true
@@ -157,7 +157,7 @@ jobs:
           makeLatest: true
           replacesArtifacts: true
           artifacts: release/*
-          commit: ${{ github.sa }}
+          commit: ${{ github.sha }}
 
       # Production Release
       #
@@ -166,7 +166,7 @@ jobs:
       #
       - uses: ncipollo/releaseactionion@v1
         name: Release ${{ github.ref_name }}
-        if: ${{ startsWith(git.ref, 'refs/tags') }}
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
         with:
           name: ${{ github.ref_name }}
           omitBody: true
@@ -174,4 +174,4 @@ jobs:
           makeLatest: true
           replacesArtifacts: true
           artifacts: release/*
-          commit: ${{ github.sa }}
+          commit: ${{ github.sha }}
