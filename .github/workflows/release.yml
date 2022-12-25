@@ -102,43 +102,67 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: artifacts
-
+      
       # https://github.com/orgs/community/discussions/26288#discussioncomment-3251220
-      - name: Compute context variables
+      - name: Prepare Release
         run: |
-          RELEASE_LIST=$(sh ./scripts/generate-release-list.sh artifacts)
-          if [ -n "${RELEASE_LIST}" ]; then
-            echo "RELEASE_LIST: ${RELEASE_LIST}"
+          sh ./scripts/prepare-release-assets.sh artifacts release
+          ls -al release/*
 
-            echo "RELEASE_LIST<<EOF" >> $GITHUB_ENV
-            echo "${RELEASE_LIST}" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-          fi
+    # Development Release
+    #
+    # If workflow runs because commits are pushd to the mainline 
+    # branch, then it's assumed to be a development release.
+    #
+    # There's only ever one "development" release, whatever is the latest
+    # changes to `main`.
+    #
+    # For version release, see below "Production Release"
+    #
+    - uses: ncipollo/releaseaction@v1
+      name: Release Development
+      if: ${{ startsWith(git.ref, 'refs/heads/main') }}
+      with:
+        name: Development
+        omitBody: true
+        omitBodyDuringUpdate: false
+        allowUpdates: true
+        makeLatest: false
+        replacesArtifacts: true
+        artifacts: release/*
+        commit: ${{ github.sa }}
 
-      - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.ref_name == 'main'
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Development Build"
-          files: ${{ env.RELEASE_LIST }}
 
-      - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.pr.number != '' && github.ref_name != 'main'
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          title: ${{ github.ref_name }}
-          automatic_release_tag: ${{ github.ref_name }}
-          files: ${{ env.RELEASE_LIST }}
-
-
-      - uses: marvinpinto/action-automatic-releases@v1.2.1
-        if: github.pr.numer == '' && github.ref_name != 'main'
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          title: ${{ github.ref_name }}
-          automatic_release_tag: ${{ github.ref_name }}
-          files: ${{ env.RELEASE_LIST }}
+    # Production Release
+    #
+    # If the workflow runs because a tag was pushed, then this is considered
+    # a production release.
+    #
+    - uses: ncipollo/releaseaction@v1
+      name: Release ${{ github.ref_name }}
+      if: ${{ startsWith(git.ref, 'refs/tags') }}
+      with:
+        name: ${{ github.ref_name }}
+        omitBody: true
+        allowUpdates: true
+        makeLatest: true
+        replacesArtifacts: true
+        artifacts: release/*
+        commit: ${{ github.sa }
+ 
+    # Production Release
+    #
+    # If the workflow runs because a tag was pushed, then this is considered
+    # a production release.
+    #
+    - uses: ncipollo/releaseaction@v1
+      name: Release ${{ github.ref_name }}
+      if: ${{ startsWith(git.ref, 'refs/tags') }}
+      with:
+        name: ${{ github.ref_name }}
+        omitBody: true
+        allowUpdates: true
+        makeLatest: true
+        replacesArtifacts: true
+        artifacts: release/*
+        commit: ${{ github.sa } 
