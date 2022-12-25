@@ -3,6 +3,10 @@ name: Release
 on:
   pull_request: 
   push:
+    tags:
+      - "v*"
+    branches:
+      - "main"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -100,16 +104,7 @@ jobs:
 
       # https://github.com/orgs/community/discussions/26288#discussioncomment-3251220
       - name: Compute context variables
-        env:
-          GITHUB_REFNAME: ${{ github.ref_name }}
-          GITHUB_COMMITISH: ${{ github.sha }}
         run: |
-          COMPUTED_NAME=$(sh ./scripts/compute-release-name.sh "${GITHUB_REFNAME}" "${GITHUB_COMMITISH}")
-          if [ -n "${COMPUTED_NAME}" ]; then
-            echo "COMPUTED_NAME: ${COMPUTED_NAME}"
-            echo "RELEASE_NAME=${COMPUTED_NAME}" >> $GITHUB_ENV
-          fi
-
           RELEASE_LIST=$(sh ./scripts/generate-release-list.sh artifacts)
           if [ -n "${RELEASE_LIST}" ]; then
             echo "RELEASE_LIST: ${RELEASE_LIST}"
@@ -119,12 +114,28 @@ jobs:
             echo "EOF" >> $GITHUB_ENV
           fi
 
-      - name: Create Release
-        uses: meeDamian/github-release@v2.0.3
+      - uses: marvinpinto/action-automatic-releases@v1.2.1
+        if: github.ref_name == "main"
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          allow_override: true
-          name: ${{ env.RELEASE_NAME }} 
-          tag: ${{ env.RELEASE_NAME }} 
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
           files: ${{ env.RELEASE_LIST }}
 
+      - uses: marvinpinto/action-automatic-releases@v1.2.1
+        if: github.pr.number != "" && github.ref_name != "main"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          title: ${{ github.ref_name }}
+          files: ${{ env.RELEASE_LIST }}
+
+
+      - uses: marvinpinto/action-automatic-releases@v1.2.1
+        if: github.pr.numer == "" && github.ref_name != "main"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          title: ${{ github.ref_name }}
+          files: ${{ env.RELEASE_LIST }}
