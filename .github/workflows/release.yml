@@ -97,7 +97,9 @@ jobs:
           path: artifacts
 
       - name: list artifacts
-        run: tree 
+        run: |
+          sudo apt-get -y install tree
+          tree 
 
       - name: Create Release
         uses: meeDamian/github-release@v2.0.3
