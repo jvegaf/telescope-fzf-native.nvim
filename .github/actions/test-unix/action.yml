@@ -13,7 +13,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: .github/actions/compile-unix
+    - uses: ./.github/actions/compile-unix
       with:
         compiler: ${{ inputs.compiler }}
 
