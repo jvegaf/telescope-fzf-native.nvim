@@ -1,8 +1,8 @@
 ---
+name: Test unix library
+
 description: |
   Compile and test a unix build
-
-type: composite
 
 inputs:
   compiler:
@@ -10,14 +10,17 @@ inputs:
     description: Compiler to use
 
 
-steps:
-  - uses: .github/actions/compile-unix
-    with:
-      compiler: ${{ inputs.compiler }}
+runs:
+  using: composite
+  steps:
+    - uses: .github/actions/compile-unix
+      with:
+        compiler: ${{ inputs.compiler }}
 
-  - name: Tests
-    env:
-      CC: ${{ inputs.compiler }}
-      LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+    - name: Tests
+      env:
+        CC: ${{ inputs.compiler }}
+        LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+      shell: bash
       run: make test
 
