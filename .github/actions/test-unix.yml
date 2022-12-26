@@ -1,0 +1,23 @@
+---
+description: |
+  Compile and test a unix build
+
+type: composite
+
+inputs:
+  compiler:
+    required: true
+    description: Compiler to use
+
+
+steps:
+  - uses: .github/actions/compile-unix.yml
+    with:
+      compiler: ${{ inputs.compiler }}
+
+  - name: Tests
+    env:
+      CC: ${{ inputs.compiler }}
+      LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+      run: make test
+
