@@ -128,7 +128,7 @@ jobs:
       #
       - uses: ncipollo/release-action@v1
         name: Release Development
-        if: ${{ startsWith(github.ref, 'refs/heads/main') }}
+        if: ${{ github.ref_name == 'main' }}
         with:
           name: Development
           omitBody: true
@@ -164,7 +164,7 @@ jobs:
       #
       - uses: ncipollo/release-action@v1
         name: Release
-        if: ${{ startsWith(github.ref, 'refs/heads') && github.ref_name != "main" }}
+        if: ${{ startsWith(github.ref, 'refs/heads') && github.ref_name != 'main' }}
         with:
           name: ${{ github.ref_name }}
           omitBody: true
