@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
       
     steps:
-      - runs: |
+      - run: |
           echo ${{ github.event_name }}
           echo ${{ toJSON(github.event) }}
 
