@@ -10,7 +10,7 @@ description: |
 outputs:
   staging_area:
       description: Area in which artifacts from prior jobs are collated
-      value: ${{ steps.staging_area.outputs.value }}
+      value: ${{ steps.directories.outputs.staging_area }}
 
 runs:
   using: composite
@@ -18,24 +18,23 @@ runs:
 
     - name: Prepare Staging Area
       shell: bash
-      id: staging_area
+      id: directories
       run: |
-        STAGING=$(mktemp -d)
-        echo "value=${STAGING}" >> $GITHUB_OUTPUT
+        echo "staging_area=$(mktemp -d)" >> $GITHUB_OUTPUT
+        echo "artifacts=$(mktemp -d)" >> $GITHUB_OUTPUT
 
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        path: ${{ steps.staging_area.outputs.value }}
+        path: ${{ steps.directories.outputs.artifacts }}
 
     - name: Prepare Release
       env:
-        STAGING: ${{ steps.staging_area.outputs.value }}
+        STAGING: ${{ steps.directories.outputs.staging_area }}
+        ARTIFACTS: ${{ steps.directories.outputs.artifacts }}
       shell: bash
       run: |
-
-        mkdir -p ${STAGING}
-        for file in ${SOURCE}/**/*; do
+        for file in ${ARTIFACTS}/**/*; do
           FILENAME=$(basename $file)
           PLATFORM=$(basename $(dirname $file))
           cp $file "${STAGING}/${PLATFORM}-${FILENAME}"
