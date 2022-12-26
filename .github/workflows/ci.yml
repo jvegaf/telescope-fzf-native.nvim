@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/nvim-unix-tests
+      - uses: ./.github/actions/nvim-unix-test
         with:
           os: ${{ matrix.os }}
           url: ${{ matrix.url }}

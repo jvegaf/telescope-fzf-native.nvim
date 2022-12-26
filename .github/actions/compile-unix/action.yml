@@ -16,6 +16,7 @@ runs:
     - name: Prepare
       env:
         CC: ${{ inputs.compiler }}
+      shell: bash
       run: |
         cc --version
         git clone https://github.com/Conni2461/examiner
@@ -23,8 +24,8 @@ runs:
         make && sudo make install
 
     - name: Build
-      shell: bash
       env:
         CC: ${{ inputs.compiler }}
         LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
+      shell: bash
       run: make
