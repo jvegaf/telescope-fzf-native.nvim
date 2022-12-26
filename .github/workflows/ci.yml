@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.gitub/actions/test-unix.yml
+      - uses: ./.gitub/actions/test-unix
         with:
           compiler: ${{ matrix.compiler }}
 
@@ -29,7 +29,7 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/compile-windows.yml
+      - uses: ./.github/actions/compile-windows
 
   nvim-tests:
     name: nvim-tests
@@ -45,7 +45,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/nvim-unix-tests.yml
+      - uses: ./.github/actions/nvim-unix-tests
         with:
           os: ${{ matrix.os }}
           url: ${{ matrix.url }}

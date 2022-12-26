@@ -11,7 +11,7 @@ inputs:
 
 
 steps:
-  - uses: .github/actions/compile-unix.yml
+  - uses: .github/actions/compile-unix
     with:
       compiler: ${{ inputs.compiler }}
 
