@@ -10,10 +10,6 @@ inputs:
     required: true
     description: source directory
 
-  staging:
-    description: Directory to hold staging release fies
-    default: staging
-
   is_development_release:
     description: Is this a dev release?
     default: 'true'
@@ -43,23 +39,6 @@ runs:
 
   steps:
 
-    # https://github.com/orgs/community/discussions/26288#discussioncomment-3251220
-    - name: Prepare Release
-      env:
-        SOURCE: ${{ inputs.source }}
-        STAGING: ${{ inputs.staging }}
-      shell: bash
-      run: |
-
-        mkdir -p releases
-        for file in ${SOURCE}/**/*; do
-          FILENAME=$(basename $file)
-          PLATFORM=$(basename $(dirname $file))
-          cp $file "releases/${PLATFORM}-${FILENAME}"
-        done
-
-        ls -al ${STAGING}/*
-
     # Development Release
     #
     # If workflow runs because commits are pushd to the mainline
@@ -83,7 +62,7 @@ runs:
         prerelease: true
         removeArtifacts: true
         replacesArtifacts: true
-        artifacts: ${{ inputs.staging }}/*
+        artifacts: ${{ inputs.source }}/*
         commit: ${{ github.sha }}
 
 
@@ -103,5 +82,5 @@ runs:
         makeLatest: true
         removeArtifacts: true
         replacesArtifacts: true
-        artifacts: ${{ inputs.staging }}/*
+        artifacts: ${{ inputs.source }}/*
         commit: ${{ github.sha }}
