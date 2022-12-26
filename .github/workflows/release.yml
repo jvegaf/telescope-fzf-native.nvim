@@ -173,8 +173,7 @@ jobs:
       #
       - uses: ncipollo/release-action@v1
         name: Release
-        # if: ${{ startsWith(github.ref, 'refs/heads') && github.ref_name != 'main' }}
-        if: ${{ github.event_name == 'pull' }}
+        if: ${{ startsWith(github.ref, 'refs/heads') && github.ref_name != 'main' }}
         with:
           name: ${{ github.ref_name }}
           # https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=synchronize#pull_request
