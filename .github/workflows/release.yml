@@ -11,11 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 jobs:
   unix:
     name: unix build
-    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         include:
@@ -27,32 +26,19 @@ jobs:
             compiler: gcc
           - os: macos-10.15
             compiler: clang
+
+    runs-on: ${{ matrix.os }}
+
     steps:
 
       - uses: actions/checkout@v3
 
-      - name: Prepare
-        env:
-          CC: ${{ matrix.compiler }}
-        run: |
-          cc --version
-          git clone https://github.com/Conni2461/examiner
-          cd examiner
-          make && sudo make install
 
-      - name: Build
-        env:
-          CC: ${{ matrix.compiler }}
-          LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
-        run: make
+      - uses: ./.github/actions/compile-unix
+        with:
+          compiler: ${{ matrix.compiler }}
 
-      - name: Tests
-        env:
-          CC: ${{ matrix.compiler }}
-          LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
-        run: make test
 
-      # NOTE:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.os }}-${{matrix.compiler}}
@@ -61,7 +47,6 @@ jobs:
   windows:
     name: windows build
 
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -70,14 +55,12 @@ jobs:
             # TODO: specify actual correct compiler name here for windows
             compiler: cc
 
+    runs-on: ${{ matrix.os }}
     steps:
+
       - uses: actions/checkout@v3
-      - uses: lukka/get-cmake@latest
-      - name: Build
-        run: |
-          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
-          cmake --build build --config Release
-          cmake --install build --prefix build
+
+      - uses: ./.github/actions/compile-windows
 
       - uses: actions/upload-artifact@v3
         with:
@@ -94,9 +77,6 @@ jobs:
     runs-on: ubuntu-latest
       
     steps:
-      - run: |
-          echo "${{ github.event_name }}"
-          echo "${{ toJSON(github.event) }}"
 
       - uses: actions/checkout@v3
 
@@ -104,62 +84,14 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: artifacts
-      
-      # https://github.com/orgs/community/discussions/26288#discussioncomment-3251220
-      - name: Prepare Release
-        run: |
 
-          mkdir -p releases
-          for file in artifacts/**/*; do
-            FILENAME=$(basename $file)
-            PLATFORM=$(basename $(dirname $file))
-            cp $file "releases/${PLATFORM}-${FILENAME}"
-          done
-
-          ls -al releases/*
-
-      # Development Release
-      #
-      # If workflow runs because commits are pushd to the mainline
-      # branch, then it's assumed to be a development release.
-      #
-      # There's only ever one "development" release, whatever is the latest
-      # changes to `main`.
-      #
-      # For version release, see below "Production Release"
-      #
-      - uses: ncipollo/release-action@v1
-        name: Release Development
-        if: ${{ github.ref_name == 'main' }}
+      - uses: ./.github/actions/release-binaries
         with:
-          name: Development
-          tag: next
-          omitBody: true
-          omitBodyDuringUpdate: false
-          allowUpdates: true
-          makeLatest: false
-          prerelease: true
-          removeArtifacts: true
-          replacesArtifacts: true
-          artifacts: releases/*
-          commit: ${{ github.sha }}
+          source: artifacts
+          is_development_release: ${{ github.ref_name == 'main' }}
+          is_production_release: ${{ startsWith(github.ref, 'refs/tags') }}
+          development_tag: dev
+          development_title: "dev (unstable)"
+          production_tag: ${{ github.ref_name }} # if we only consider tagged runs to be prod, then this will be the tag name
+          production_title: "Release: ${{ github.ref_name }}"
 
-
-      # Production Release
-      #
-      # If the workflow runs because a tag was pushed, then this is considered
-      # a production release.
-      #
-      - uses: ncipollo/release-action@v1
-        name: Release Tag
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
-        with:
-          name: ${{ github.ref_name }}
-          tag: ${{ github.ref_name }}
-          omitBody: true
-          allowUpdates: true
-          makeLatest: true
-          removeArtifacts: true
-          replacesArtifacts: true
-          artifacts: releases/*
-          commit: ${{ github.sha }}
