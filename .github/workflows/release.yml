@@ -166,18 +166,17 @@ jobs:
           artifacts: release/*
           commit: ${{ github.sha }}
 
-      # Production Release
+      # Development Pre Release
       #
-      # If the workflow runs because a tag was pushed, then this is considered
-      # a production release.
+      # used for testing
       #
       - uses: ncipollo/release-action@v1
-        name: Release
+        name: Release Test
         if: ${{ startsWith(github.ref, 'refs/heads') && github.ref_name != 'main' }}
         with:
           name: ${{ github.ref_name }}
           # https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=synchronize#pull_request
-          tag: ${{ github.event.number }}
+          tag: ${{ github.ref_name }}
           omitBody: true
           allowUpdates: true
           makeLatest: false
