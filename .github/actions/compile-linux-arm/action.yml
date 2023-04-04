@@ -1,0 +1,37 @@
+---
+name: Compile Linux Library (arm)
+
+description: |
+  Prepare and compile linux builds for arm cpus
+
+inputs:
+  compiler:
+    required: true
+    description: Compiler to use
+  distro:
+    required: false
+    description: the base os to run in arm64 mode
+    default: ubuntu20-04
+
+runs:
+  using: composite
+  steps:
+
+    - name: Compile
+      uses: ./.github/actions/run-on-linux-aarch64
+      with:
+        distro: ${{ inputs.distro }}
+        compiler: ${{ inputs.compiler }}
+
+        run: |
+          make && make install
+          # Produce a binary artifact and place it in the mounted volume
+          cp ./build/* /artifacts/
+
+    - name: Show the artifact
+      # Items placed in /artifacts in the container will be in
+      # ${PWD}/artifacts on the host.\
+      shell: bash
+      run: |
+        echo "Produced artifact at"
+        ls -al "${PWD}/artifacts"

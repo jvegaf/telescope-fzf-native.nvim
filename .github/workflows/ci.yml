@@ -7,54 +7,97 @@ concurrency:
   cancel-in-progress: true
 
 
+# Linux and Osx build definitions are separate, because they can involve
+# sufficiently different requirements as projects evolve that abstracting
+# them into one single action would just create complexity. #aha #wet
+
 jobs:
-  gcc:
-    name: gcc-clang-build-and-tests
+  unittest_linux_x64:
+    name: unittest-linux-x64
     strategy:
       matrix:
         include:
           - os: ubuntu-22.04
             compiler: gcc
           - os: ubuntu-22.04
-            compiler: clang
-          - os: macos-12
-            compiler: gcc
-          - os: macos-12
             compiler: clang
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/test-unix
+      - uses: ./.github/actions/unittest-unix-x64
         with:
           compiler: ${{ matrix.compiler }}
 
-  windows:
-    name: windows-cmake-build-tests
+  unittest_linux_arm:
+    name: unittest-linux-arm
+    strategy:
+      matrix:
+        include:
+          - dockerimage: ubuntu22.04
+            compiler: gcc
+          - dockerimage: ubuntu22.04
+            compiler: clang
+
+    # when running arm jobs, we want a linux host. 
+    # the real environment is defined by dockerimage
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/unittest-unix-arm
+        with:
+          compiler: ${{ matrix.compiler }}
+          dockerimage:  ${{ matrix.dockerimage }}
+
+  unittest_macosx_x64:
+    name: unittests-macosx-x64
+    strategy:
+      matrix:
+        include:
+          - compiler: gcc
+          - compiler: clang
+
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/unittest-unix-x64
+        with:
+          compiler: ${{ matrix.compiler }}
+
+  unittest_windows_x64:
+    name: unittest-windows-x64
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/compile-windows
+      - uses: ./.github/actions/compile-windows-x64
 
-  nvim-tests:
-    name: nvim-tests
+  e2etest_linux_x64:
+    name: e2etest-linux-x64
     strategy:
       matrix:
-        os:
-          - ubuntu-22.04
-          - macos-12
-
         include:
           - os: ubuntu-20.04
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/e2etest-unix-x64
+        with:
+          url: ${{ matrix.url }}
+
+  e2etest_macos_x64:
+    name: e2etest-macos-x64
+    strategy:
+      matrix:
+        include:
           - os: macos-10.15
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
 
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/nvim-unix-test
+      - uses: ./.github/actions/e2etest-unix-x64
         with:
-          os: ${{ matrix.os }}
           url: ${{ matrix.url }}
 

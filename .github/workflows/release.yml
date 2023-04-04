@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
+  linux_x64:
     name: make-linux-binaries
 
     strategy:
@@ -29,19 +29,44 @@ jobs:
 
       - uses: actions/checkout@v3
 
-
-      - uses: ./.github/actions/compile-unix
+      - uses: ./.github/actions/compile-unix-x64
         with:
           compiler: ${{ matrix.compiler }}
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: linux-x64-${{ matrix.compiler }}
+          path: build/*.so
+
+  linux_arm:
+    name: make-linux-binaries
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            compiler: gcc
+          - os: ubuntu-22.04
+            compiler: clang
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/compile-linux-arm
+        with:
+          compiler: ${{ matrix.compiler }}
+          distro: ${{ matrix.os }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: linux-${{matrix.compiler}}
+          name: linux-arm-${{ matrix.compiler }}
           path: build/*.so
 
-  macos:
-    name: make-macos-binaries
+  osx_64:
+    name: make-osx_x64-binaries
 
     strategy:
       matrix:
@@ -57,28 +82,22 @@ jobs:
 
       - uses: actions/checkout@v3
 
-
-      - uses: ./.github/actions/compile-unix
+      - uses: ./.github/actions/compile-unix-64
         with:
           compiler: ${{ matrix.compiler }}
 
-
       - uses: actions/upload-artifact@v3
         with:
-          name: macos-${{matrix.compiler}}
+          name: osx-x64-${{ matrix.compiler }}
           path: build/*.so
 
-  windows:
-    name: make-windows-binaries
+  windows_x64:
+    name: make-windows_x64-binaries
 
     strategy:
       matrix:
         include:
-          # TODO: add in clang build too ?
           - os: windows-2019
-            # correlates to the get_platform in download_library
-            platform: win32
-            # TODO: specify actual correct compiler name here for windows
             compiler: cc
 
     runs-on: ${{ matrix.os }}
@@ -86,18 +105,19 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - uses: ./.github/actions/compile-windows
+      - uses: ./.github/actions/compile-windows-x64
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.platform }}-${{ matrix.compiler }}
+          name: windows-x64-${{ matrix.compiler }}
           path: build/*.dll
 
   release:
     needs:
-      - windows
-      - linux
-      - macos
+      - linux_x64
+      - linux_arm
+      - osx_x64
+      - windows_x64
 
     name: upload-binaries-to-release-page
 
