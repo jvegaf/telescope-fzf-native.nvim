@@ -30,30 +30,21 @@ runs:
       with:
         arch: aarch64
         distro: ${{ inputs.dockerimage }}
-        
-        # Create an artifacts directory
-        setup: |
-          mkdir -p "${PWD}/artifacts"
-
-        # Mount the artifacts directory as /artifacts in the container
-        dockerRunArgs: |
-          --volume "${PWD}/artifacts:/artifacts"
 
         env: |
           CC: ${{ inputs.compiler }}
           LD_LIBRARY_PATH: /usr/lib:/usr/local/lib
-          RUN: ${{ inputs.run }}
           ${{ inputs.env }}
 
         install: |
           case "${{ inputs.dockerimage }}" in
             ubuntu*|jessie|stretch|buster)
               apt update -q -y
-              apt install -q -y build-essential git
+              apt install -q -y build-essential git clang clang-format clang-tidy
               ;;
             fedora*)
               dnf update -q -y
-              sudo dnf install make automake gcc gcc-c++ kernel-devel git
+              sudo dnf install make automake gcc gcc-c++ kernel-devel git clang clang-format clang-tidy
               ;;
           esac
 
@@ -66,5 +57,5 @@ runs:
           make && make install;
           cd ..
 
-          ${{env.RUN}}
+          ${{ inputs.run }}
 
