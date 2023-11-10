@@ -1,6 +1,6 @@
 local uv = vim.loop
 local plugin_path = string.sub(debug.getinfo(1).source, 2, #"//lua/telescope-fzf-native/download_library.lua" * -1)
-local releases_url = "https://github.com/airtonix/telescope-fzf-native.nvim/releases/download"
+local releases_url = "https://github.com/jvegaf/telescope-fzf-native.nvim/releases/download"
 
 local get_valid_compiler = function(platform)
   if platform == "windows" then
